@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="jNtccVM">
+    <output-path>$PROJECT_DIR$/out/artifacts/jNtccVM</output-path>
+    <root id="archive" name="jNtccVM.jar">
+      <element id="module-output" name="jNtcc" />
+      <element id="file-copy" path="$USER_HOME$/xstream-1.4.2/lib/xstream/xmlpull-1.1.3.1.jar" />
+      <element id="file-copy" path="$USER_HOME$/xstream-1.4.2/lib/xstream-1.4.2.jar" />
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/out/artifacts/META-INF/MANIFEST.MF" />
+      </element>
+    </root>
+  </artifact>
+</component>

@@ -1,0 +1,96 @@
+<html>
+<head>
+<title>Choice.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: rgb(0,0,0); font-weight: normal; font-style: normal; }
+.s0 { color: rgb(0,0,128); font-weight: bold; }
+.s1 { }
+.s2 { color: rgb(128,128,128); font-style: italic; }
+.s3 { color: rgb(128,128,128); font-weight: bold; font-style: italic; }
+.s4 { color: rgb(0,128,0); font-weight: bold; }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#C0C0C0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+Choice.java</FONT>
+</center></TD></TR></TABLE>
+<pre>
+
+<span class="s0">package </span><span class="s1">utcclang; 
+ 
+</span><span class="s0">import </span><span class="s1">utccEnums.EjecutionProc; 
+</span><span class="s0">import </span><span class="s1">utccEnums.LocksC; 
+ 
+</span><span class="s2">/** 
+ * Clase que implementa la instrucion de Choice de Ntcc 
+ * </span><span class="s3">@author  </span><span class="s2">Misael Viveros Castro 
+ * 
+ */</span><span class="s1"> 
+</span><span class="s0">public class </span><span class="s1">Choice </span><span class="s0">extends </span><span class="s1">ChoiceGen&lt;AskChoice&gt; { 
+ 
+     
+    </span><span class="s2">/** 
+     *  
+     */</span><span class="s1"> 
+    </span><span class="s0">public </span><span class="s1">Choice(AskChoice...asks ) { 
+        </span><span class="s0">this</span><span class="s1">.setAsk(asks); 
+        </span><span class="s0">this</span><span class="s1">.locknum = LocksC.getlockStruc(</span><span class="s0">this</span><span class="s1">.toString()); 
+    } 
+     
+    </span><span class="s0">public static </span><span class="s1">Choice getChoice() { 
+        </span><span class="s0">return new </span><span class="s1">Choice(); 
+    } 
+ 
+    </span><span class="s2">/* (non-Javadoc) 
+     * @see Procesos#run() 
+     */</span><span class="s1"> 
+     
+    @Override 
+    </span><span class="s0">public  void </span><span class="s1">run() { 
+            </span><span class="s0">synchronized </span><span class="s1">(</span><span class="s0">this</span><span class="s1">) { 
+                    System.out.println(</span><span class="s4">&quot; Iniciando ---&gt; &quot;</span><span class="s1">+ </span><span class="s0">this</span><span class="s1">.getIdProc()+ </span><span class="s4">&quot; Proce Name &quot;</span><span class="s1">+ </span><span class="s0">this</span><span class="s1">.toString()); 
+                    LocksC.SetCountlock(</span><span class="s0">this</span><span class="s1">.locknum, </span><span class="s0">this</span><span class="s1">.getAsk().length); 
+                    </span><span class="s0">for </span><span class="s1">(AskChoice ask : </span><span class="s0">this</span><span class="s1">.getAsk()) { 
+                        </span><span class="s0">try </span><span class="s1">{ 
+                            ask.setIdlock(</span><span class="s0">this</span><span class="s1">.locknum); 
+                            System.out.println(</span><span class="s4">&quot; (Choice)..  Ejecutando el Proceso No.---&gt; &quot;</span><span class="s1">+ ask.getIdProc()+ </span><span class="s4">&quot; Proce Name &quot;</span><span class="s1">+ ask.toString()); 
+                            RegistryPro.ChangeState(ask.getIdProc(), EjecutionProc._RUNNING); 
+                            Planner.addServiceExec(ask); 
+                        } </span><span class="s0">catch </span><span class="s1">(Exception e) { System.out.print(</span><span class="s4">&quot;Error&quot;</span><span class="s1">+e); } 
+                         
+                    } 
+                    System.out.println(</span><span class="s4">&quot; (Choice).. Locknum (numero del Lock) ---------&gt;&quot; </span><span class="s1">+ </span><span class="s0">this</span><span class="s1">.locknum + </span><span class="s4">&quot; Size List Askchoice &quot; </span><span class="s1">+ </span><span class="s0">this</span><span class="s1">.getAsk().length ); 
+                    System.out.println(</span><span class="s4">&quot;(Esperando Terminacion de los AskChoice &quot; </span><span class="s1">+ LocksC.getCountlock(</span><span class="s0">this</span><span class="s1">.locknum).getCount()); 
+ 
+                    </span><span class="s0">try </span><span class="s1">{ 
+                        LocksC.getIdLock(</span><span class="s0">this</span><span class="s1">.locknum).getCountDownLock().await(); 
+                    } </span><span class="s0">catch </span><span class="s1">(InterruptedException e) { 
+                        e.printStackTrace();  </span><span class="s2">//To change body of catch statement use File | Settings | File Templates.</span><span class="s1"> 
+                    } 
+ 
+              
+             
+                        System.out.println(</span><span class="s4">&quot; (Choice)...                :) Notyficando Los AskChoice Para su ejecucion ----&gt;&quot; </span><span class="s1">); 
+                        LocksC.StarteLock(</span><span class="s0">this</span><span class="s1">.locknum); </span><span class="s2">// indica que los askchoice pueden ejecutarse</span><span class="s1"> 
+                  }      
+                    </span><span class="s0">synchronized </span><span class="s1">(LocksC.getStarObject(</span><span class="s0">this</span><span class="s1">.locknum)) {LocksC.getStarObject(</span><span class="s0">this</span><span class="s1">.locknum).notifyAll(); }; 
+                    System.out.print(</span><span class="s4">&quot;Validacion --- &gt; Estado de las guardas de AskChoice &quot; </span><span class="s1">+ LocksC.getStar(</span><span class="s0">this</span><span class="s1">.locknum)); 
+                    </span><span class="s0">synchronized </span><span class="s1">(Planner.syncroValid.get()) {RegistryPro.ChangeState(</span><span class="s0">this</span><span class="s1">.getIdProc(), EjecutionProc._FINISH); 
+                        Planner.syncroValid.get().notifyAll(); }; 
+                     
+                    </span><span class="s0">try </span><span class="s1">{ 
+                        </span><span class="s0">this</span><span class="s1">.finalize(); 
+                    } </span><span class="s0">catch </span><span class="s1">(Throwable e) { 
+                        e.printStackTrace(); 
+                    } 
+        </span><span class="s2">//}</span><span class="s1"> 
+    } 
+     
+ 
+} 
+</span></pre>
+</body>
+</html>
