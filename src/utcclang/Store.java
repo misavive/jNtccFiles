@@ -10,7 +10,9 @@ package utcclang;
  */
 
 
-import JaCoP.constraints.*;
+import JaCoP.constraints.Constraint;
+import JaCoP.constraints.PrimitiveConstraint;
+import JaCoP.constraints.Reified;
 import JaCoP.core.BooleanVar;
 import JaCoP.core.IntVar;
 import utccEnums.CsvWriter;
@@ -369,9 +371,42 @@ public class Store extends StoreGen<JaCoP.core.Store, Constraint,IntVar> {
 		return Store.getModelStore().consistency();
 	}
 
-	
+    public static void writerStoreCsv() throws IOException {
+        String nameFile = Store.getStore().getFilename() + ".csv";
 
-	public static void writerStoreCsv() throws IOException {
+        boolean fileExists = new File(nameFile).exists();
+        CsvWriter csvOutput = new CsvWriter(new FileWriter(nameFile, true), ',');
+
+        try {
+            // 1) Si el archivo es nuevo, escribimos la cabecera UNA sola vez
+            if (!fileExists) {
+                csvOutput.write("DateTime");
+                csvOutput.write("UTiempo");
+                for (Vars vars : AmbientGen.getArrayutcc()) {
+                    csvOutput.write(Store.getModelStore().findVariable(vars.varname).id());
+                }
+                csvOutput.endRecord();
+            }
+
+            // 2) Siempre escribimos la fila de datos de la unidad actual
+            csvOutput.write(Calendar.getInstance().getTime().toString());
+            csvOutput.write(String.valueOf(Planner.getNextUnit()));
+
+            for (Vars vars : AmbientGen.getArrayutcc()) {
+                IntVar tempo = (IntVar) Store.getModelStore().findVariable(vars.varname);
+                String valor = String.valueOf(tempo.value());
+                csvOutput.write(valor);
+            }
+
+            csvOutput.endRecord();
+
+        } finally {
+            // 3) Siempre cerrar el writer
+            csvOutput.close();
+        }
+    }
+
+	/* public static void writerStoreCsv() throws IOException {
         String nameFile = Store.getStore().getFilename() +".csv";
 
         boolean fileExists = new File(nameFile).exists();
@@ -398,7 +433,9 @@ public class Store extends StoreGen<JaCoP.core.Store, Constraint,IntVar> {
 		}
 		
 			
-	}
+	}*/
+
+
 
     public static void writerStore() throws IOException {
         File file = new File(Store.getStore().getFilename());

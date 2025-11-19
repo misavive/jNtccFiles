@@ -1,7 +1,7 @@
 package utcclang;
 
-/**
- * @author Misael Viveros Castro
+/*
+  @author Misael Viveros Castro
  * clase  que implementa la ejecucion de los procesos.
  * @version {@value}
  */
@@ -34,7 +34,7 @@ public class  Planner implements Runnable {
     //Calcular el tiempo de Ejecucion.
     public volatile long  tInicio = Calendar.getInstance().getTimeInMillis();public volatile long tFin = Calendar.getInstance().getTimeInMillis();
 
-    /**
+    /*
      *  Identificador de Lock para planner.
      *  Utilizado para validar los constraint de los Ask.
      */
@@ -191,12 +191,10 @@ public class  Planner implements Runnable {
 					while (!Planner.proEjecution.get()) {
 						try {
 							Planner.this.executionProc() ;
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						} catch (IOException e) {
-							e.printStackTrace();
+						} catch (InterruptedException | IOException e) {
+							e.toString();
 						}
-					}
+                    }
 				}
 			}
 			
@@ -286,7 +284,7 @@ public class  Planner implements Runnable {
 	//******************************  Ejecucion  *****************************************
 	
 	
-	/**
+	/*
      * Ejecuta la lista  de  procesos Activos que son retornados por
      * getProceAct() --> Lista de Procesos.
      * @throws IOException 
@@ -342,7 +340,7 @@ public class  Planner implements Runnable {
 
 	
 	
-	/**
+	/*
 	 * Validacion de la terminacion de los procesos.
 	 * @throws InterruptedException 
 	 * @throws IOException 

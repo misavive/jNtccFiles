@@ -1,6 +1,6 @@
 package utcclang;
 
-/**
+/*
  *  Clase que implementa el Ambiente en JaCop Constraint
  * @author  Misael Viveros Castro
  * 
@@ -38,7 +38,7 @@ public class Ambient extends AmbientGen<Store,Constraint> {
         Constraint c = converConstrain(clasname,parvarn1,parvarn2);
         AmbientC varsConst = new AmbientC();    //Campo que implementa la clase AmbienC para transformar los constraint
         varsConst.addAmbientCon(parvarn1, parvarn2,unit,c);  //
-        super.getVarsEnviromen().add(varsConst);
+        getVarsEnviromen().add(varsConst);
 
 
     }
@@ -83,7 +83,8 @@ public class Ambient extends AmbientGen<Store,Constraint> {
 		IntVar varConverX = new IntVar(); IntVar varConverY = new IntVar(); varConverX.id = parvarn1;varConverY.id = parvarn2; 
 		Class<?> clasCon = Class.forName(classname);
 		Constructor<?> constru2 = clasCon.getDeclaredConstructor(new Class<?>[] {JaCoP.core.IntVar.class,JaCoP.core.IntVar.class});
-		Constraint c = (Constraint) constru2.newInstance(varConverX,varConverY);
+		Constraint c;
+        c = (Constraint) constru2.newInstance(varConverX,varConverY);
 		return c;
 	}
 
@@ -93,7 +94,8 @@ public class Ambient extends AmbientGen<Store,Constraint> {
         Class<?> clasCon = Class.forName(classname);
         System.out.println(clasCon.toString());
         Constructor<?> constru2 = clasCon.getDeclaredConstructor(new Class<?>[] {JaCoP.core.IntVar.class,int.class});
-        Constraint c = (Constraint) constru2.newInstance(varConverX,parvarn2);
+        Constraint c;
+        c = (Constraint) constru2.newInstance(varConverX, parvarn2);
         return c;
     }
 

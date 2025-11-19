@@ -1,6 +1,6 @@
 package utcclang;
 
-/**
+/*
  * @author  Misael Viveros Castro
  *26/05/2011
  */
@@ -14,12 +14,12 @@ import java.util.List;
 
 
 public class Par extends Procesos {
-	private List<Procesos> proc = Collections.synchronizedList(new ArrayList<Procesos>()) ;
+	private final List<Procesos> proc = Collections.synchronizedList(new ArrayList<Procesos>()) ;
+    private final Procesos[] process;
 
     public Par(Procesos... process) {
-        for (Procesos p : process) {
-            proc.add(p);
-        }
+        this.process = process;
+        Collections.addAll(proc, process);
         this.setName(NameProce._PAR,EjecutionProc._CREATE);
     }
 
@@ -39,14 +39,14 @@ public class Par extends Procesos {
 	            finally {
 	            	RegistryPro.ChangeState(this.getIdProc(), EjecutionProc._FINISH);
 	            	synchronized (Planner.syncroValid.get()) {
-                        Planner.syncroValid.get().notify(); };
+                        Planner.syncroValid.get().notify(); }
 	            }
 	            i++;
 	        }
     	 }
-            Collections.shuffle(this.proc);
+	        
 	        synchronized (Planner.syncroValid.get()) {RegistryPro.ChangeState(this.getIdProc(), EjecutionProc._FINISH);
-                Planner.syncroValid.get().notifyAll(); };
+                Planner.syncroValid.get().notifyAll(); }
 	        try {
 				this.finalize();
 			} catch (Throwable e) {
