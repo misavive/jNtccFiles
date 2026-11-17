@@ -29,13 +29,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class Store extends StoreGen<JaCoP.core.Store, Constraint,IntVar> {
     private final  static AtomicInteger numStore = new AtomicInteger(2);
-    private volatile static AtomicReference<Object> lockValConst = new AtomicReference<Object>(new Object());
-    private volatile  static AtomicReference<Object> lockDelete = new AtomicReference<Object>(new Object());
+    private static final AtomicReference<Object> lockValConst = new AtomicReference<Object>(new Object());
+    private static final AtomicReference<Object> lockDelete = new AtomicReference<Object>(new Object());
     //private final static ReentrantLock lock = new ReentrantLock(); // Change 03/06 lenta ejecucion
     private final static AtomicReference<Object> lock = new AtomicReference<Object>(new Object());
     //private final static ReentrantLock lockDelete = new ReentrantLock();
-    private volatile static AtomicReference<JaCoP.core.Store> modelStore = new AtomicReference<JaCoP.core.Store>(new JaCoP.core.Store());
-    private volatile static AtomicReference<Object> lockAddVar = new AtomicReference<Object>(new Object());
+    private static final AtomicReference<JaCoP.core.Store> modelStore = new AtomicReference<JaCoP.core.Store>(new JaCoP.core.Store());
+    private static final AtomicReference<Object> lockAddVar = new AtomicReference<Object>(new Object());
     private volatile static BooleanVar varAuxtemp01 =  new BooleanVar(Store.getModelStore(),"varAuxtemp01", 0,1);
 
 
@@ -242,40 +242,32 @@ public class Store extends StoreGen<JaCoP.core.Store, Constraint,IntVar> {
     * @return Boolean --> identifica si fue posible validar el constraint en el store
     */
 
-    public static  Boolean validateCons(Constraint cons) {
+    // En Store.java -> Reemplazamos el método validateCons(Constraint cons) por este:
+    public static Boolean validateCons(Constraint cons) {
         boolean valretu = false;
-
-
-        // reentrante lock
-        //lock.lock();   // change 03/06 many Locks
         synchronized (Store.getLock()) {
-        try{
+            int tempLevel = Store.getModelStore().level + 1;
+            try {
+                PrimitiveConstraint c = (PrimitiveConstraint) cons;
+                c.atomicExecution = true;
 
-            PrimitiveConstraint c = (PrimitiveConstraint) cons;
-            c.atomicExecution = true;
+                // Subimos un nivel temporal exclusivo para esta validación
+                Store.getModelStore().setLevel(tempLevel);
 
-            Store.getModelStore().setLevel(Store.numStore.get());
+                // Creamos una variable booleana fresca en este nivel temporal
+                BooleanVar varAuxLocal = new BooleanVar(Store.getModelStore(), "aux_" + System.nanoTime(), 0, 1);
 
-            Store.getModelStore().imposeWithConsistency(new Reified(c, varAuxtemp01) ); //varAuxtemp01
-            //Store.getModelStore().consistency();
+                Store.getModelStore().imposeWithConsistency(new Reified(c, varAuxLocal));
+                valretu = (varAuxLocal.value() == 1);
 
-            valretu = (varAuxtemp01.value() == 1) ? true:false;
-            //System.out.println("== [Store] [ValidateCons()] " + valretu + "satis " + c.satisfied());
-            varAuxtemp01.remove(Store.numStore.get());
-
-
-
-        } catch (Throwable e) {
-
-            if (Store.getsConsistency() == false) {
-                System.out.print("([ValidateConst] - Constraint Error in Store  - Inconsistente " + e);
-            } else {
-                System.out.print(" Store (ValidateConst)  Error - Store " + e);
+            } catch (Throwable e) {
+                valretu = false;
+            } finally {
+                // Limpiamos por completo el Reified y la variable auxiliar de este nivel temporal
+                // para no dejar restricciones fantasma en el Store principal
+                Store.getModelStore().removeLevel(tempLevel);
+                Store.getModelStore().setLevel(Store.numStore.get());
             }
-        }
-
-         // finally {
-         //   lock.unlock();
         }
         return valretu;
     }

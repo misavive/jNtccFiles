@@ -385,11 +385,15 @@ public class  Planner implements Runnable {
                                     }
 
                             }// syncroAskValid
-                                    if (Planner.this.askvalideList(RegistryPro.listProRunning(NameProce._ASK)) == 0) {
-                                       // System.out.println("Liberando Guardas de los Ask Bloqueados ");
-                                        Planner.endWaitAsk.set(true);  // Liberando los Lock de los Ask
-                                        synchronized (Planner.lockAsk.get()) {Planner.lockAsk.get().notifyAll(); }  // Liberando los Lock de los Ask
-                                    }
+                    if (Planner.this.askvalideList(RegistryPro.listProRunning(NameProce._ASK)) == 0
+                            && RegistryPro.numProExcludeU(NameProce._ASK) == 0) {
+                        // Solo liberamos los Ask bloqueados cuando ya NO quedan Ask validables
+                        // NI tampoco procesos nuevos (_TELL, _PAR, _CHOICE) corriendo producto de un Ask recién validado:
+                        Planner.endWaitAsk.set(true);
+                        synchronized (Planner.lockAsk.get()) {
+                            Planner.lockAsk.get().notifyAll();
+                        }
+                    }
                 } else {
                     System.out.println("  ValideEndPro()  [  Not Running Ask  ] \n" );
                 }  //Fin valide Ask >0

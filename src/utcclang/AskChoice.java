@@ -36,24 +36,24 @@ public class AskChoice extends AskGen<Constraint> {
 				}
 		}
         //System.out.println(" -------------AskChoice Esperando validar constraint ");
-		synchronized (Planner.lockAsk.get()) {
-				while(!Store.validateCons(this.getC()) && !Planner.endWaitAsk.get()) {
-                    try {
-                       // System.out.println(" AskChoice Wait--- " + this.getIdProc() + " Proce Name " + this.toString());
-                        Planner.lockAsk.get().wait();
-                    } catch (Exception e) {
-                        System.out.println("Error" + e);
-                    } finally {
-                        RegistryPro.ChangeState(this.getIdProc(), EjecutionProc._FINISH);
-                        synchronized (Planner.syncroAskValid.get()) { Planner.syncroAskValid.get().notifyAll(); } ; }
+        // En AskChoice.java (bloque del while)
+        synchronized (Planner.lockAsk.get()) {
+            while (!Store.validateCons(this.getC()) && !Planner.endWaitAsk.get()) {
+                try {
+                    Planner.lockAsk.get().wait();
+                } catch (Exception e) {
+                    System.out.println("Error" + e);
+                } finally {
+                    // Solo notificamos al Planner, sin cambiar estado a _FINISH dentro del while
+                    synchronized (Planner.syncroAskValid.get()) {
+                        Planner.syncroAskValid.get().notifyAll();
+                    }
                 }
-				
-				
-			
-		}
+            }
+        }
 		synchronized (LocksC.getObject(this.getIdlock())) {
 					//LocksC.LockStruc lockname = LocksC.getIdLock(this.getIdlock());
-               if (Store.getStore().validateCons(this.getC())) {
+               if (Store.validateCons(this.getC())) {
 					if (!LocksC.getYeslock(this.getIdlock()) ) {
 						LocksC.changeLock(this.getIdlock());
 						System.out.println(" AskChoice --Constraint validado Ejecutando x Proceso ---" + this.toString() + " Del Choice -->" + LocksC.getIdLock(this.getIdlock()).getNameClass()); //+ lockname.getNameClass()
@@ -76,7 +76,7 @@ public class AskChoice extends AskGen<Constraint> {
 		synchronized (Planner.syncroAskValid.get()) {RegistryPro.ChangeState(this.getIdProc(), EjecutionProc._FINISH);
             Planner.syncroAskValid.get().notifyAll(); };
 		try {
-			this.finalize();
+            System.out.println("Finalizo"); //this.finalize();
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
