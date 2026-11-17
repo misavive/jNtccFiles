@@ -657,24 +657,24 @@ public class  Planner implements Runnable {
 	 * @return valide --> bolean
 	 */
 	@SuppressWarnings("rawtypes")
-	public  boolean stateAsk(int idProce) { // se quito el syncrhonize
+    public boolean stateAsk(int idProce) {
         boolean valide = false;
         lock.lock();
         try {
-
-            AskGen<?> proceAsk = (AskGen) RegistryPro.getProR(idProce);
-            if (Store.validateCons((Constraint) proceAsk.getC())) {
-
-                valide = true;
-                //System.out.println("***|||||*** (stateAsk) Constrain Validado Exitosamente " + proceAsk.getIdProc());
+            Procesos p = RegistryPro.getProR(idProce);
+            if (p instanceof AskGen<?>) {
+                AskGen<?> proceAsk = (AskGen<?>) p;
+                if (proceAsk.getC() != null && Store.validateCons((Constraint) proceAsk.getC())) {
+                    valide = true;
+                }
             }
-        }  catch (Exception e) {
-            System.out.println("error " +e.toString());
-        }  finally {
+        } catch (Exception e) {
+            System.out.println("error " + e.toString());
+        } finally {
             lock.unlock();
         }
-				return valide;
-	}
+        return valide;
+    }
 	
 	/**
 	 * Metodo para validar las guardas de una Lista de Procesos Ask 

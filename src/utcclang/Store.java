@@ -40,19 +40,23 @@ public class Store extends StoreGen<JaCoP.core.Store, Constraint,IntVar> {
 
 
     /*
-	 * (non-Javadoc)
+	 * @Autor Misael Viveros Nov. 26 2026
 	 * @see StoreGen#creavars(java.lang.String)
+	 * En Store.java -> Reemplazar el método creavars(String name) corrige duplicidad de variables:
 	 */
-	@Override
-	public void creavars(String name) {
-        Store.getModelStore().setLevel(1);
-        synchronized (Store.lockAddVar.get()) {
-            IntVar temp_1970_05 = new IntVar();temp_1970_05.id = name;  //"Prefijo que altera el nombre de la variable"
-            Store.getModelStore().putVariable(temp_1970_05);
+    @Override
+    public void creavars(String name) {
+        synchronized (Store.getLock()) {
+            // Solo la creamos si aún no existe en el Store de JaCoP
+            if (Store.getModelStore().findVariable(name) == null) {
+                int currentLevel = Store.getModelStore().level;
+                new IntVar(Store.getModelStore(), name, Integer.MIN_VALUE / 2, Integer.MAX_VALUE / 2);
+                if (currentLevel >= Store.numStore.get()) {
+                    Store.getModelStore().setLevel(currentLevel);
+                }
+            }
         }
-		//new IntVar(Store.getModelStore(), name,Integer.MIN_VALUE/2,Integer.MAX_VALUE/2);
-		
-	}
+    }
 
 	/*
 	 * (non-Javadoc)
